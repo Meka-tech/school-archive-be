@@ -79,12 +79,13 @@ exports.deleteSchool = async (req, res, next) => {
   try {
     const _id = req.params.id;
 
-    const deletedSchool = await School.findByIdAndDelete(_id);
-    //delete everything about school (session , terms)
+    const deletedSchool = await School.findById(_id);
 
     if (!deletedSchool) {
       return res.status(404).json({ message: "School not found" });
     }
+
+    await deletedSchool.deleteOne();
 
     res.status(200).json({ message: "School deleted successfully" });
   } catch (err) {

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Session = require("./session");
 
 const Schema = mongoose.Schema;
 
@@ -19,5 +20,13 @@ const schoolSchema = new Schema(
   },
   { timestamps: true }
 );
+
+schoolSchema.pre("deleteOne", { document: true }, async function (next) {
+  const sessions = await Session.find({ schoolId: this._id });
+  for (const session of sessions) {
+    await session.deleteOne();
+  }
+  next();
+});
 
 module.exports = mongoose.model("School", schoolSchema);

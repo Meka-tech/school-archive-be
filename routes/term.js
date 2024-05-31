@@ -12,6 +12,10 @@ router.delete("/:id", termController.deleteTerm);
 
 router.put("/staff-data/:id", termController.postStaffData);
 
+router.put("/staff-data/update/:id", termController.updateStaffData);
+
+router.delete("/staff-data/:id", termController.deleteStaffData);
+
 ///class
 
 router.put("/class/:id", termController.postClass);

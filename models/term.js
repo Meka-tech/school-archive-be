@@ -12,4 +12,12 @@ const termSchema = new Schema(
   { timestamps: true }
 );
 
+termSchema.pre("deleteOne", { document: true }, async function (next) {
+  await mongoose.model("classData").deleteMany({ _id: { $in: this.classes } });
+  await mongoose.model("Staff").deleteMany({ _id: { $in: this.staffList } });
+  if (this.staffData) {
+    await mongoose.model("StaffData").deleteOne({ _id: this.staffData });
+  }
+  next();
+});
 module.exports = mongoose.model("Term", termSchema);

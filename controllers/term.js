@@ -10,16 +10,18 @@ exports.createTerm = async (req, res, next) => {
     const term_no = req.body.term_no;
     const ExistingSession = await Session.findById(sessionId);
 
-    const ExistingTerm = await Term.findOne({ term_no });
+    const session = await Session.findById(sessionId).populate("terms").exec();
 
-    if (ExistingTerm) {
-      const error = new Error("A Term with this number already exists");
+    if (!ExistingSession) {
+      const error = new Error("Session does not exist");
       error.statusCode = 422;
       throw error;
     }
 
-    if (!ExistingSession) {
-      const error = new Error("Session does not exist");
+    const termExists = session.terms.find((term) => term.term_no === term_no);
+
+    if (termExists) {
+      const error = new Error("A Term with this number already exists");
       error.statusCode = 422;
       throw error;
     }
@@ -52,7 +54,7 @@ exports.deleteTerm = async (req, res, next) => {
       return res.status(404).json({ message: "Term does not exist" });
     }
 
-    await Term.findByIdAndDelete(_id);
+    await TermExists.deleteOne();
     //delete classes , staffList , staffData
 
     res.status(200).json({ messgae: "term deleted " });
@@ -87,6 +89,54 @@ exports.postStaffData = async (req, res, next) => {
     );
 
     res.status(200).json({ messgae: "data posted " });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.updateStaffData = async (req, res, next) => {
+  try {
+    const _id = req.params.id;
+
+    const updateData = req.body;
+
+    const StaffItem = await StaffData.findById(_id);
+
+    if (!StaffItem) {
+      return res.status(404).json({ message: "Staff data does not exist" });
+    }
+    const updatedStaff = await StaffData.findByIdAndUpdate(_id, updateData, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ messgae: "Staff data edited", data: updatedStaff });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.deleteStaffData = async (req, res, next) => {
+  try {
+    const _id = req.params.id;
+
+    const StaffDataExists = await StaffData.findById(_id);
+
+    if (!StaffDataExists) {
+      return res
+        .status(404)
+        .json({ message: "School staff data does not exist" });
+    }
+
+    await StaffData.findByIdAndDelete(_id);
+
+    res.status(200).json({ messgae: "school staff data deleted" });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
