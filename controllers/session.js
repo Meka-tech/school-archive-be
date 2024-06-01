@@ -1,4 +1,3 @@
-const School = require("../models/school");
 const Session = require("../models/session");
 
 exports.createSession = async (req, res, next) => {
@@ -68,12 +67,14 @@ exports.deleteSession = async (req, res, next) => {
   try {
     const _id = req.params.id;
 
-    const deletedSession = await Session.findByIdAndDelete(_id);
+    const deletedSession = await Session.findById(_id);
     //delete everything about school (terms)
 
     if (!deletedSession) {
       return res.status(404).json({ message: "Session does not exist" });
     }
+
+    await deletedSession.deleteOne();
 
     res.status(200).json({ message: "Session deleted successfully" });
   } catch (err) {

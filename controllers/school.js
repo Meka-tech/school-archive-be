@@ -33,14 +33,16 @@ exports.getSchoolById = async (req, res, next) => {
     if (!school) {
       return res.status(404).json({ message: "School not found" });
     }
-    const sessions = await Session.find({ schoolId }).populate({
-      path: "terms",
-      populate: [
-        { path: "classes", model: "classData" },
-        { path: "staffData", model: "StaffData" },
-        { path: "staffList", model: "Staff" }
-      ]
-    });
+    const sessions = await Session.find({ schoolId })
+      .populate({
+        path: "terms",
+        populate: [
+          { path: "classes", model: "classData" },
+          { path: "staffData", model: "StaffData" },
+          { path: "staffList", model: "Staff" }
+        ]
+      })
+      .populate("finance_details");
 
     res
       .status(200)

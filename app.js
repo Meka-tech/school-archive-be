@@ -17,6 +17,7 @@ const isAuth = require("./middleware/is-auth");
 const schoolRoutes = require("./routes/school");
 const sessionRoutes = require("./routes/session");
 const termRoutes = require("./routes/term");
+const detailRoutes = require("./routes/financeDetail");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -35,6 +36,8 @@ app.use("/school", schoolRoutes);
 app.use("/session", sessionRoutes);
 
 app.use("/term", termRoutes);
+
+app.use("/finance-detail", detailRoutes);
 
 //whenever an error is thrown with next()
 app.use((error, req, res, next) => {
