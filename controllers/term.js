@@ -73,20 +73,11 @@ exports.postStaffData = async (req, res, next) => {
     const _id = req.params.id;
     const staffData = req.body.staffData;
 
-    const staffDetails = new StaffData(staffData);
+    const FoundTerm = await Term.findById(_id);
 
-    const NewStaffData = await staffDetails.save();
+    FoundTerm.staffData = staffData;
 
-    await Term.findByIdAndUpdate(
-      _id,
-      {
-        staffData: NewStaffData._id
-      },
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    await FoundTerm.save();
 
     res.status(200).json({ messgae: "data posted " });
   } catch (err) {
@@ -149,16 +140,13 @@ exports.deleteStaffData = async (req, res, next) => {
 exports.postClass = async (req, res, next) => {
   try {
     const _id = req.params.id;
+    const Data = req.body.classData;
 
-    const NewClassData = new classData(req.body.classData);
+    const FoundTerm = await Term.findById(_id);
 
-    const SavedClassData = await NewClassData.save();
+    FoundTerm.classData = Data;
 
-    await Term.findByIdAndUpdate(
-      _id,
-      { $addToSet: { classes: SavedClassData._id } },
-      { new: true, useFindAndModify: false }
-    );
+    await FoundTerm.save();
 
     res.status(200).json({ messgae: "data posted " });
   } catch (err) {
@@ -220,15 +208,13 @@ exports.postStaff = async (req, res, next) => {
   try {
     const _id = req.params.id;
 
-    const NewStaff = new Staff(req.body.staff);
+    const Data = req.body.staffList;
 
-    const SavedStaff = await NewStaff.save();
+    const FoundTerm = await Term.findById(_id);
 
-    await Term.findByIdAndUpdate(
-      _id,
-      { $addToSet: { staffList: SavedStaff._id } },
-      { new: true, useFindAndModify: false }
-    );
+    FoundTerm.staffList = Data;
+
+    await FoundTerm.save();
 
     res.status(200).json({ messgae: "data posted " });
   } catch (err) {

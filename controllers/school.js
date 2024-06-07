@@ -1,6 +1,28 @@
 const School = require("../models/school");
 const Session = require("../models/session");
 
+exports.getSchools = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const schools = await School.find()
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit));
+
+    const total = await School.countDocuments();
+    res.status(200).json({
+      results: schools,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number(page)
+    });
+  } catch (error) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
 exports.createSchool = async (req, res, next) => {
   const data = req.body;
 

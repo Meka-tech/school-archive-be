@@ -11,7 +11,7 @@ const schoolSchema = new Schema(
     administratorName: { type: String, required: true },
     telephone: { type: String, required: true },
     email: { type: String, required: true },
-    foundingYear: { type: Date, required: true },
+    foundingYear: { type: Number, required: true },
     educationLevels: { type: String, required: true },
     studentBoarding: { type: Boolean, required: true },
     pta: { type: String, required: true },

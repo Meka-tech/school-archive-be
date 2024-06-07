@@ -17,6 +17,24 @@ exports.signup = async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
   try {
+    const existingUsername = await User.findOne({
+      username: username
+    });
+    if (existingUsername) {
+      const error = new Error("A user with this username exists");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const existingEmail = await User.findOne({
+      email: email
+    });
+
+    if (existingEmail) {
+      const error = new Error("A user with this email exists");
+      error.statusCode = 401;
+      throw error;
+    }
     const hashedPw = await bcrypt.hash(password, 12);
 
     const user = new User({

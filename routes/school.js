@@ -4,6 +4,7 @@ const schoolController = require("../controllers/school");
 
 const router = express.Router();
 
+router.get("/", schoolController.getSchools);
 router.get("/search", schoolController.searchSchoolsByName);
 router.get("/:id", schoolController.getSchoolById);
 router.post("/", schoolController.createSchool);
