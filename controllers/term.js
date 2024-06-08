@@ -140,11 +140,11 @@ exports.deleteStaffData = async (req, res, next) => {
 exports.postClass = async (req, res, next) => {
   try {
     const _id = req.params.id;
-    const Data = req.body.classData;
+    const Data = req.body.classes;
 
     const FoundTerm = await Term.findById(_id);
 
-    FoundTerm.classData = Data;
+    FoundTerm.classes = Data;
 
     await FoundTerm.save();
 

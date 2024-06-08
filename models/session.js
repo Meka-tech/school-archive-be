@@ -7,7 +7,12 @@ const sessionSchema = new Schema({
   terms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Term" }],
   schoolId: { type: mongoose.Schema.Types.ObjectId, ref: "School" },
   finance_details: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "financeDetail" }
+    {
+      class: { type: String, required: true },
+      first_term: { type: String },
+      second_term: { type: String },
+      third_term: { type: String }
+    }
   ]
 });
 

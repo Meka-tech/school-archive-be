@@ -29,32 +29,34 @@ exports.updateSession = async (req, res, next) => {
   try {
     const Id = req.body.id;
     const sessionName = req.body.session;
-
-    const ExistingName = await Session.findOne({ session: sessionName });
-
-    if (ExistingName) {
-      const error = new Error("A Session with this name already exists");
-      error.statusCode = 422;
-      throw error;
-    }
+    const finance_details = req.body.finance_details;
 
     const ExistingSession = await Session.findById(Id);
+
     if (!ExistingSession) {
       const error = new Error("Session does not exist");
       error.statusCode = 422;
       throw error;
     }
 
-    const updatedSession = await Session.findByIdAndUpdate(
-      Id,
-      { session: sessionName },
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    if (sessionName) {
+      const ExistingName = await Session.findOne({ session: sessionName });
 
-    res.status(201).json({ message: "session updated", data: updatedSession });
+      if (ExistingName) {
+        const error = new Error("A Session with this name already exists");
+        error.statusCode = 422;
+        throw error;
+      }
+
+      ExistingSession.session = sessionName;
+    }
+
+    if (finance_details) {
+      ExistingSession.finance_details = finance_details;
+    }
+    const updatedSession = await ExistingSession.save();
+
+    res.status(200).json({ message: "session updated", data: updatedSession });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
