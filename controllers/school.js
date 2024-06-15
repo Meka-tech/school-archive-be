@@ -3,9 +3,25 @@ const Session = require("../models/session");
 
 exports.getSchools = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page, limit, sort } = req.query;
+    let sortOption;
+
+    switch (sort) {
+      case "recentlyUpdated":
+        sortOption = { updatedAt: -1 };
+        break;
+      case "latestFoundingYear":
+        sortOption = { foundingYear: -1 };
+        break;
+      case "latestInspectionDate":
+        sortOption = { latestDateOfInspection: -1 };
+        break;
+      default:
+        sortOption = {};
+    }
 
     const schools = await School.find()
+      .sort(sortOption)
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));
 
@@ -120,29 +136,53 @@ exports.deleteSchool = async (req, res, next) => {
   }
 };
 
-exports.searchSchoolsByName = async (req, res) => {
-  // http://localhost:5000/api/schools/search?name=SchoolName&page=1&limit=10
+exports.searchSchoolsByName = async (req, res, next) => {
   try {
-    const name = req.query.name;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const sort = req.query.sort;
+    const search = req.query.search;
 
-    if (!name) {
+    const searchOption = {
+      $or: [
+        { name: new RegExp(search, "i") },
+        { email: new RegExp(search, "i") },
+        { location: new RegExp(search, "i") },
+        { localGovernmentCouncil: new RegExp(search, "i") },
+        { administratorName: new RegExp(search, "i") },
+        { pta: new RegExp(search, "i") }
+      ]
+    };
+    let sortOption;
+    switch (sort) {
+      case "recentlyUpdated":
+        sortOption = { updatedAt: -1 };
+        break;
+      case "latestFoundingYear":
+        sortOption = { foundingYear: -1 };
+        break;
+      case "latestInspectionDate":
+        sortOption = { latestDateOfInspection: -1 };
+        break;
+      default:
+        sortOption = {};
+    }
+
+    if (!search) {
       return res
         .status(400)
-        .json({ message: "Name query parameter is required" });
+        .json({ message: "Search query parameter is required" });
     }
 
     // Perform case-insensitive search for schools by name with pagination
-    const schools = await School.find({ name: { $regex: name, $options: "i" } })
+    const schools = await School.find(searchOption)
+      .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
     // Get the total count of documents matching the query
-    const total = await School.countDocuments({
-      name: { $regex: name, $options: "i" }
-    });
+    const total = await School.countDocuments(searchOption);
 
     if (schools.length === 0) {
       return res.status(404).json({ message: "No schools found" });
