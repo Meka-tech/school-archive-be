@@ -3,9 +3,21 @@ const Session = require("../models/session");
 
 exports.getSchools = async (req, res, next) => {
   try {
-    const { page, limit, sort } = req.query;
-    let sortOption;
+    const { page, limit, sort, filter } = req.query;
 
+    let FilterOptions = {};
+    if (filter) {
+      FilterOptions = {
+        securityGuard: JSON.parse(filter).securityGuard,
+        studentBoarding: JSON.parse(filter).studentBoarding,
+        educationLevels: { $in: JSON.parse(filter).educationLevels },
+        foundingYear: {
+          $gte: JSON.parse(filter).foundingYear.from,
+          $lte: JSON.parse(filter).foundingYear.to
+        }
+      };
+    }
+    let sortOption;
     switch (sort) {
       case "recentlyUpdated":
         sortOption = { updatedAt: -1 };
@@ -20,7 +32,7 @@ exports.getSchools = async (req, res, next) => {
         sortOption = {};
     }
 
-    const schools = await School.find()
+    const schools = await School.find(FilterOptions)
       .sort(sortOption)
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));
@@ -31,7 +43,7 @@ exports.getSchools = async (req, res, next) => {
       totalPages: Math.ceil(total / limit),
       currentPage: Number(page)
     });
-  } catch (error) {
+  } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
     }
@@ -143,6 +155,20 @@ exports.searchSchoolsByName = async (req, res, next) => {
     const skip = (page - 1) * limit;
     const sort = req.query.sort;
     const search = req.query.search;
+    const filter = req.query.filter;
+
+    let FilterOptions = {};
+    if (filter) {
+      FilterOptions = {
+        securityGuard: JSON.parse(filter).securityGuard,
+        studentBoarding: JSON.parse(filter).studentBoarding,
+        educationLevels: { $in: JSON.parse(filter).educationLevels },
+        foundingYear: {
+          $gte: JSON.parse(filter).foundingYear.from,
+          $lte: JSON.parse(filter).foundingYear.to
+        }
+      };
+    }
 
     const searchOption = {
       $or: [
@@ -176,7 +202,7 @@ exports.searchSchoolsByName = async (req, res, next) => {
     }
 
     // Perform case-insensitive search for schools by name with pagination
-    const schools = await School.find(searchOption)
+    const schools = await School.find({ ...searchOption, ...FilterOptions })
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
