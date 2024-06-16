@@ -3,36 +3,62 @@ const Session = require("../models/session");
 
 exports.getSchools = async (req, res, next) => {
   try {
-    const { page, limit, sort, filter } = req.query;
+    const {
+      page,
+      limit,
+      sort,
+      foundingYear,
+      hasBoarding,
+      hasGuard,
+      educationLevels,
+      order
+    } = req.query;
 
-    let FilterOptions = {};
-    if (filter) {
-      FilterOptions = {
-        securityGuard: JSON.parse(filter).securityGuard,
-        studentBoarding: JSON.parse(filter).studentBoarding,
-        educationLevels: { $in: JSON.parse(filter).educationLevels },
+    let filter = {};
+
+    if (foundingYear) {
+      filter = {
+        ...filter,
         foundingYear: {
-          $gte: JSON.parse(filter).foundingYear.from,
-          $lte: JSON.parse(filter).foundingYear.to
+          $gte: JSON.parse(foundingYear).from,
+          $lte: JSON.parse(foundingYear).to
         }
       };
     }
-    let sortOption;
-    switch (sort) {
-      case "recentlyUpdated":
-        sortOption = { updatedAt: -1 };
-        break;
-      case "latestFoundingYear":
-        sortOption = { foundingYear: -1 };
-        break;
-      case "latestInspectionDate":
-        sortOption = { latestDateOfInspection: -1 };
-        break;
-      default:
-        sortOption = {};
+    if (hasBoarding) {
+      filter = {
+        ...filter,
+        studentBoarding: hasBoarding === `"yes"` ? true : false
+      };
+    }
+    if (hasGuard) {
+      filter = {
+        ...filter,
+        securityGuard: hasGuard === `"yes"` ? true : false
+      };
+    }
+    if (educationLevels) {
+      filter = {
+        ...filter,
+        educationLevels: { $all: JSON.parse(educationLevels) }
+      };
     }
 
-    const schools = await School.find(FilterOptions)
+    let sortOption = {};
+
+    const sortOrder = Number(order);
+
+    if (sort === "recentlyUpdated") {
+      sortOption = { updatedAt: sortOrder };
+    }
+    if (sort === "latestFoundingYear") {
+      sortOption = { foundingYear: sortOrder };
+    }
+    if (sort === "latestInspectionDate") {
+      sortOption = { latestDateOfInspection: sortOrder };
+    }
+
+    const schools = await School.find(filter)
       .sort(sortOption)
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));
@@ -150,23 +176,46 @@ exports.deleteSchool = async (req, res, next) => {
 
 exports.searchSchoolsByName = async (req, res, next) => {
   try {
+    const {
+      sort,
+      foundingYear,
+      hasBoarding,
+      hasGuard,
+      educationLevels,
+      order
+    } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const sort = req.query.sort;
     const search = req.query.search;
-    const filter = req.query.filter;
 
-    let FilterOptions = {};
-    if (filter) {
-      FilterOptions = {
-        securityGuard: JSON.parse(filter).securityGuard,
-        studentBoarding: JSON.parse(filter).studentBoarding,
-        educationLevels: { $in: JSON.parse(filter).educationLevels },
+    let filter = {};
+
+    if (foundingYear) {
+      filter = {
+        ...filter,
         foundingYear: {
-          $gte: JSON.parse(filter).foundingYear.from,
-          $lte: JSON.parse(filter).foundingYear.to
+          $gte: JSON.parse(foundingYear).from,
+          $lte: JSON.parse(foundingYear).to
         }
+      };
+    }
+    if (hasBoarding) {
+      filter = {
+        ...filter,
+        studentBoarding: hasBoarding === `"yes"` ? true : false
+      };
+    }
+    if (hasGuard) {
+      filter = {
+        ...filter,
+        securityGuard: hasGuard === `"yes"` ? true : false
+      };
+    }
+    if (educationLevels) {
+      filter = {
+        ...filter,
+        educationLevels: { $all: JSON.parse(educationLevels) }
       };
     }
 
@@ -180,19 +229,18 @@ exports.searchSchoolsByName = async (req, res, next) => {
         { pta: new RegExp(search, "i") }
       ]
     };
-    let sortOption;
-    switch (sort) {
-      case "recentlyUpdated":
-        sortOption = { updatedAt: -1 };
-        break;
-      case "latestFoundingYear":
-        sortOption = { foundingYear: -1 };
-        break;
-      case "latestInspectionDate":
-        sortOption = { latestDateOfInspection: -1 };
-        break;
-      default:
-        sortOption = {};
+    let sortOption = {};
+
+    const sortOrder = Number(order);
+
+    if (sort === "recentlyUpdated") {
+      sortOption = { updatedAt: sortOrder };
+    }
+    if (sort === "latestFoundingYear") {
+      sortOption = { foundingYear: sortOrder };
+    }
+    if (sort === "latestInspectionDate") {
+      sortOption = { latestDateOfInspection: sortOrder };
     }
 
     if (!search) {
@@ -201,13 +249,11 @@ exports.searchSchoolsByName = async (req, res, next) => {
         .json({ message: "Search query parameter is required" });
     }
 
-    // Perform case-insensitive search for schools by name with pagination
-    const schools = await School.find({ ...searchOption, ...FilterOptions })
+    const schools = await School.find({ ...searchOption, ...filter })
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
 
-    // Get the total count of documents matching the query
     const total = await School.countDocuments(searchOption);
 
     if (schools.length === 0) {
