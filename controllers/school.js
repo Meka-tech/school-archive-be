@@ -40,7 +40,7 @@ exports.getSchools = async (req, res, next) => {
     if (educationLevels) {
       filter = {
         ...filter,
-        educationLevels: { $all: JSON.parse(educationLevels) }
+        educationLevels: { $or: JSON.parse(educationLevels) }
       };
     }
 
@@ -215,7 +215,7 @@ exports.searchSchoolsByName = async (req, res, next) => {
     if (educationLevels) {
       filter = {
         ...filter,
-        educationLevels: { $all: JSON.parse(educationLevels) }
+        educationLevels: { $or: JSON.parse(educationLevels) }
       };
     }
 
