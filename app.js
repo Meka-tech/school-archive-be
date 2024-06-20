@@ -12,12 +12,13 @@ const port = 8080;
 
 app.use(bodyParser.json()); //aplication/json
 
+//routes
 const authRoutes = require("./routes/auth");
 const isAuth = require("./middleware/is-auth");
 const schoolRoutes = require("./routes/school");
 const sessionRoutes = require("./routes/session");
 const termRoutes = require("./routes/term");
-const detailRoutes = require("./routes/financeDetail");
+const blogRoutes = require("./routes/blog");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -39,7 +40,7 @@ app.use("/session", sessionRoutes);
 
 app.use("/term", termRoutes);
 
-app.use("/finance-detail", detailRoutes);
+app.use("/blog", blogRoutes);
 
 //whenever an error is thrown with next()
 app.use((error, req, res, next) => {

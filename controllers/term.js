@@ -1,8 +1,5 @@
 const Session = require("../models/session");
 const Term = require("../models/term");
-const StaffData = require("../models/staffData");
-const Staff = require("../models/staff");
-const classData = require("../models/classData");
 
 exports.createTerm = async (req, res, next) => {
   try {
