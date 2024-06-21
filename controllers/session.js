@@ -40,7 +40,10 @@ exports.updateSession = async (req, res, next) => {
     }
 
     if (sessionName) {
-      const ExistingName = await Session.findOne({ session: sessionName });
+      const ExistingName = await Session.findOne({
+        session: sessionName,
+        schoolId: ExistingSession.schoolId
+      });
 
       if (ExistingName) {
         const error = new Error("A Session with this name already exists");
