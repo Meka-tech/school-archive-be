@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 
+require("dotenv").config();
+
 const app = express();
 
 app.use(express.json());
@@ -52,9 +54,7 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-  .connect(
-    "mongodb+srv://nnaemekaonyeji27:NnaemekaOnyeji12$@cluster0.aqfx7nc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(process.env.MONGODB_API)
   .then((result) => {
     app.listen(port);
   })
